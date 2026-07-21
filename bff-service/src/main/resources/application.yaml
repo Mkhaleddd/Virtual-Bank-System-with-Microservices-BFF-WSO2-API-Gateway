@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: bff-service
+
+# Base URLs for routing and aggregating data from internal microservices
+services:
+  user-service:
+    url: http://vbank-user-service:8081
+  account-service:
+    url: http://vbank-account-service:8082
+  transaction-service:
+    url: http://vbank-transaction-service:8083

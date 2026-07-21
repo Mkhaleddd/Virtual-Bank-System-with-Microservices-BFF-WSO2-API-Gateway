@@ -1,0 +1,34 @@
+# Built application files
+target/
+build/
+bin/
+out/
+
+# Maven Wrapper JAR
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE configurations
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+.springBeans
+.sts4-cache
+.apt_generated
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Documentation / Extra files
+HELP.md
+
+# OS generated files
+.DS_Store
+Thumbs.db
