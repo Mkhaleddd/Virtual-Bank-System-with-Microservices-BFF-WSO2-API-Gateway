@@ -6,9 +6,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserProfileResponse {
     private UUID userId;
     private String username;
