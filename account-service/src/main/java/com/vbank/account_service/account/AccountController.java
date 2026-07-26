@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("accounts/")
+@RequestMapping("/accounts")
 public class AccountController {
     private final AccountService accountService;
 
@@ -18,7 +18,7 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @PutMapping("transfer/")
+    @PutMapping("/transfer")
     public UpdateBalanceResponse updateBalance(@RequestBody UpdateBalanceRequest updateBalanceRequest) {
         return accountService.updateBalance(updateBalanceRequest);
     }
@@ -28,7 +28,7 @@ public class AccountController {
 //        return accountService.createAccount(createRequest);
 //    }
 
-    @GetMapping("{accountId}/")
+    @GetMapping("/{accountId}")
     public BankAccountResponse getBankAccount(@PathVariable("accountId") UUID accountId) {
         return accountService.getBankAccount(accountId);
     }
