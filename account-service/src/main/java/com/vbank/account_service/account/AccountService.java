@@ -22,7 +22,9 @@ public class AccountService {
 
     @Transactional
     public UpdateBalanceResponse updateBalance(UpdateBalanceRequest updateBalanceRequest) {
-
+        if (updateBalanceRequest.getFromAccountId().equals(updateBalanceRequest.getToAccountId())) {
+            throw new IllegalArgumentException("Cannot transfer to the same account.");
+        }
         Account fromAccount = accountRepository.findById(updateBalanceRequest.getFromAccountId())
                 .orElseThrow(() -> new NotFoundException("Account not found: " + updateBalanceRequest.getFromAccountId()));
         Account toAccount = accountRepository.findById(updateBalanceRequest.getToAccountId())
