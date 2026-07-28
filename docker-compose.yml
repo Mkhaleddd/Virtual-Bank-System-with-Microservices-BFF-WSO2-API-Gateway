@@ -1,20 +1,25 @@
-
+version: '3.8'
 
 services:
   # 1. PostgreSQL Database
   postgres:
     image: postgres:18-alpine
-    container_name: vbank-postgres
+    container_name: postgres
     environment:
       POSTGRES_DB: vbank_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_PASSWORD: Mm2264764
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - vbank-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vbank_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # 2. Zookeeper 
   zookeeper:
@@ -53,20 +58,15 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/vbank_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_PASSWORD=Mm2264764
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     networks:
       - vbank-net
-    develop:
-      watch:
-        - action: sync
-          path: ./user-service/src
-          target: /app/src
-        - action: rebuild
-          path: ./user-service/pom.xml
 
   # 5. Account Service
   account-service:
@@ -77,20 +77,15 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/vbank_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_PASSWORD=Mm2264764
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     networks:
       - vbank-net
-    develop:
-      watch:
-        - action: sync
-          path: ./account-service/src
-          target: /app/src
-        - action: rebuild
-          path: ./account-service/pom.xml
 
   # 6. Transaction Service
   transaction-service:
@@ -101,20 +96,15 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/vbank_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_PASSWORD=Mm2264764
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     networks:
       - vbank-net
-    develop:
-      watch:
-        - action: sync
-          path: ./transaction-service/src
-          target: /app/src
-        - action: rebuild
-          path: ./transaction-service/pom.xml
 
   # 7. Logging Service
   logging-service:
@@ -125,20 +115,15 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/vbank_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_PASSWORD=Mm2264764
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     networks:
       - vbank-net
-    develop:
-      watch:
-        - action: sync
-          path: ./logging-service/src
-          target: /app/src
-        - action: rebuild
-          path: ./logging-service/pom.xml
 
   # 8. BFF Service (Backend for Frontend)
   bff-service:
@@ -158,13 +143,6 @@ services:
       - kafka
     networks:
       - vbank-net
-    develop:
-      watch:
-        - action: sync
-          path: ./bff-service/src
-          target: /app/src
-        - action: rebuild
-          path: ./bff-service/pom.xml
 
 volumes:
   postgres_data:
