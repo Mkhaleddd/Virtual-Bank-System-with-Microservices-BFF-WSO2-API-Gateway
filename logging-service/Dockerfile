@@ -6,4 +6,6 @@ RUN ./mvnw dependency:go-offline
 COPY src/ src/
 RUN ./mvnw clean package -DskipTests
 EXPOSE 8084
-CMD ["java", "-jar", "target/*.jar"]
+
+# Use shell form so the wildcard (*) expands correctly, or target the exact jar file name
+ENTRYPOINT ["sh", "-c", "java -jar target/*.jar"]

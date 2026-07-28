@@ -1,13 +1,13 @@
 server:
-  port: 8083
+  port: 8084
 
 spring:
   application:
-    name: transaction-service
+    name: logging-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/vbank_db
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/vbank_db
     username: postgres
-    password: rootpassword
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -16,4 +16,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: transaction_schema
+        default_schema: logging_schema
+        hbm2ddl.create_namespaces: true
+        javax.persistence.schema-generation.database.action: update
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: logging-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
