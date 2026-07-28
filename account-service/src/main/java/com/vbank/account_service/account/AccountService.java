@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,19 +28,21 @@ public class AccountService {
             throw new IllegalArgumentException("Cannot transfer to the same account.");
         }
         Account fromAccount = accountRepository.findById(updateBalanceRequest.getFromAccountId())
-                .orElseThrow(() -> new NotFoundException("Account not found: " + updateBalanceRequest.getFromAccountId()));
+                .orElseThrow(
+                        () -> new NotFoundException("Account not found: " + updateBalanceRequest.getFromAccountId()));
         Account toAccount = accountRepository.findById(updateBalanceRequest.getToAccountId())
-                .orElseThrow(() -> new NotFoundException("Account not found: " + updateBalanceRequest.getToAccountId()));
+                .orElseThrow(
+                        () -> new NotFoundException("Account not found: " + updateBalanceRequest.getToAccountId()));
 
         if (fromAccount.getBalance().compareTo(updateBalanceRequest.getAmount()) < 0) {
             throw new InsufficientFundsException("Insufficient funds in account " + fromAccount.getId());
         }
         accountRepository.addToBalance(updateBalanceRequest.getAmount(), updateBalanceRequest.getToAccountId());
-        accountRepository.subtractFromBalance(updateBalanceRequest.getAmount(), updateBalanceRequest.getFromAccountId());
+        accountRepository.subtractFromBalance(updateBalanceRequest.getAmount(),
+                updateBalanceRequest.getFromAccountId());
 
         return new UpdateBalanceResponse(
-                "Account updated successfully."
-        );
+                "Account updated successfully.");
     }
 
     public BankAccountResponse getBankAccount(UUID accountId) {
@@ -51,11 +55,23 @@ public class AccountService {
                 account.getNumber(),
                 account.getBalance(),
                 account.getType(),
-                account.getStatus()
-        );
+                account.getStatus());
     }
 
-//    public CreateResponse createAccount(CreateRequest createRequest) {
-//        if(accountRepository.existsBy)
-//    }
+    public List<BankAccountResponse> getAccountsByUserId(UUID userId) {
+        List<Account> accounts = accountRepository.findByUserId(userId);
+
+        return accounts.stream()
+                .map(account -> new BankAccountResponse(
+                        account.getId(),
+                        account.getNumber(),
+                        account.getBalance(),
+                        account.getType(),
+                        account.getStatus()))
+                .toList();
+    }
+
+    // public CreateResponse createAccount(CreateRequest createRequest) {
+    // if(accountRepository.existsBy)
+    // }
 }
