@@ -1,7 +1,8 @@
-package com.vbank.logging_service.aspect;
+package com.vbank.aspect;
 
-import com.vbank.logging_service.dto.LogMessageDto;
-import com.vbank.logging_service.annotation.LoggableEvent;
+import com.vbank.annotation.LoggableEvent;
+import com.vbank.dto.LogMessageDto;
+
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
