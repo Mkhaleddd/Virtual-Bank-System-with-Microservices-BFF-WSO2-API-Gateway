@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -14,13 +14,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateRequest {
-    @NotBlank(message = "userId is required")
+    @NotNull(message = "userId is required")
     private UUID userId;
 
-    @NotBlank(message = "account type is required")
+    @NotNull(message = "account type is required")
     private AccountType accountType;
 
-    @NotBlank(message = "initial amount is required")
+    @NotNull(message = "initial amount is required")
     @PositiveOrZero(message = "Invalid Initial Amount")
     private BigDecimal initialAmount;
 }
