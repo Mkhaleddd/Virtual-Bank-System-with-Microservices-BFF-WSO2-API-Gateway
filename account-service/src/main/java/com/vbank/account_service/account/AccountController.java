@@ -2,6 +2,7 @@ package com.vbank.account_service.account;
 
 import com.vbank.account_service.account.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
