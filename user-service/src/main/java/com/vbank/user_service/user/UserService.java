@@ -5,6 +5,7 @@ import com.vbank.user_service.user.exception.ConflictException;
 import com.vbank.user_service.user.exception.NotFoundException;
 import com.vbank.user_service.user.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -73,5 +74,9 @@ public class UserService{
                 user.getFirstName(),
                 user.getLastName()
         );
+    }
+
+    public boolean isUserExists(UUID userId) {
+        return userRepository.existsById(userId);
     }
 }

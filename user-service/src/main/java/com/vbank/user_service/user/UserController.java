@@ -3,6 +3,7 @@ package com.vbank.user_service.user;
 import com.vbank.user_service.user.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -34,5 +35,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UserProfileResponse getUserProfile(@PathVariable("userId") UUID userId) {
         return userService.getUserProfile(userId);
+    }
+
+    @GetMapping("/{userId}/exists")
+    @ResponseStatus(HttpStatus.OK)
+    public boolean isUserExists(@PathVariable("userId") UUID userId) {
+        return userService.isUserExists(userId);
     }
 }
