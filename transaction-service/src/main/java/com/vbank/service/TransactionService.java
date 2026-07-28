@@ -1,13 +1,14 @@
 package com.vbank.service;
 
-import com.vbank.model.Transaction;
 import com.vbank.dto.TransferExecutionRequest;
 import com.vbank.dto.TransferInitiationRequest;
+import com.vbank.annotation.LoggableEvent;
+import com.vbank.model.Transaction;
 import com.vbank.repository.TransactionRepository;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class TransactionService {
     }
 
     @Transactional
+    @LoggableEvent(eventType = "TRANSFER_INITIATED")
     public Map<String, Object> initiateTransfer(TransferInitiationRequest req) {
         Transaction transaction = new Transaction();
         transaction.setFromAccountId(req.getFromAccountId());
@@ -30,11 +32,10 @@ public class TransactionService {
         transaction.setAmount(req.getAmount());
         transaction.setDescription(req.getDescription());
         transaction.setTimestamp(Instant.now());
-        // Updated to use uppercase/standardized status codes
         transaction.setDeliveryStatus("INITIATED");
-        
+
         Transaction savedTransaction = transactionRepository.save(transaction);
-        
+
         return Map.of(
             "transactionId", savedTransaction.getTransactionId(),
             "status", savedTransaction.getDeliveryStatus(),
@@ -43,27 +44,21 @@ public class TransactionService {
     }
 
     @Transactional
+    @LoggableEvent(eventType = "TRANSFER_EXECUTE")
     public Map<String, Object> executeTransfer(TransferExecutionRequest req) {
-        
         if (req == null || req.getTransactionId() == null) {
             throw new IllegalArgumentException("Transaction execution request or ID cannot be null");
         }
 
         Transaction transaction = transactionRepository.findById(req.getTransactionId()).orElse(null);
         if (transaction == null || transaction.getAmount() == null) {
-            // Added explicit exception handling so controllers can return a proper 404/Bad Request instead of silent nulls
             throw new RuntimeException("Transaction not found with ID: " + req.getTransactionId());
         }
-        
-        // TODO: Add call to account-service to process balance deduction/addition here
-        try {
-            transaction.setDeliveryStatus("SUCCESS");
-        } catch (Exception e) {
-            transaction.setDeliveryStatus("FAILED");
-        }
 
+        // TODO: Add call to account-service to process balance deduction/addition here
+        transaction.setDeliveryStatus("SUCCESS");
         Transaction savedTransaction = transactionRepository.save(transaction);
-        
+
         return Map.of(
             "transactionId", savedTransaction.getTransactionId(),
             "status", savedTransaction.getDeliveryStatus(),

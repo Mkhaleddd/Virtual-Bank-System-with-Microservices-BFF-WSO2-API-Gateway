@@ -1,3 +1,4 @@
+
 package com.vbank.logging_service;
 
 import org.springframework.boot.SpringApplication;
