@@ -1,15 +1,14 @@
 package com.vbank.account_service.account;
 
-import com.vbank.account_service.account.dto.BankAccountResponse;
-import com.vbank.account_service.account.dto.UpdateBalanceRequest;
-import com.vbank.account_service.account.dto.UpdateBalanceResponse;
+import com.vbank.account_service.account.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/accounts")
 public class AccountController {
     private final AccountService accountService;
 
@@ -18,18 +17,23 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @PutMapping("/transfer")
-    public UpdateBalanceResponse updateBalance(@RequestBody UpdateBalanceRequest updateBalanceRequest) {
+    @PutMapping("/accounts/transfer")
+    public UpdateBalanceResponse updateBalance(@Valid @RequestBody UpdateBalanceRequest updateBalanceRequest) {
         return accountService.updateBalance(updateBalanceRequest);
     }
 
-//    @PostMapping()
-//    public CreateResponse createAccount(@RequestBody CreateRequest createRequest) {
-//        return accountService.createAccount(createRequest);
-//    }
+    @PostMapping("/accounts")
+    public CreateResponse createAccount(@Valid @RequestBody CreateRequest createRequest) {
+        return accountService.createAccount(createRequest);
+    }
 
-    @GetMapping("/{accountId}")
+    @GetMapping("/accounts/{accountId}")
     public BankAccountResponse getBankAccount(@PathVariable("accountId") UUID accountId) {
         return accountService.getBankAccount(accountId);
+    }
+
+    @GetMapping("users/{userId}/accounts")
+    public List<BankAccountResponse> getBankAccountsByUser(@PathVariable("userId") UUID userId) {
+        return accountService.getBankAccountsByUser(userId);
     }
 }
