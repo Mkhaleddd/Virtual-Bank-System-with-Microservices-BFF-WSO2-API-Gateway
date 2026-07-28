@@ -20,4 +20,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     void subtractFromBalance(@Param("amount") BigDecimal amount, @Param("accountId") UUID accountId);
 
     List<Account> findByUserId(UUID userId);
+
+    boolean existsByNumber(String number);
 }
