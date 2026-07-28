@@ -6,8 +6,8 @@ spring:
     name: logging-service
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:5432/vbank_db
-    username: postgres
-    password: Mm2264764
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
