@@ -1,10 +1,12 @@
-package com.vbank.account_service.account.exception;
+package com.vbank.exception;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -98,6 +100,27 @@ public class GlobalExceptionHandler {
         response.put("timestamp", LocalDateTime.now());
 
         return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(HttpStatusCodeException.class)
+    public ResponseEntity<Map<String, Object>> handleDownstreamException(HttpStatusCodeException ex) {
+        Map<String, Object> response = new HashMap<>();
+        String downstreamMessage;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> parsed = mapper.readValue(
+                    ex.getResponseBodyAsString(),
+                    new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+            downstreamMessage = String.valueOf(parsed.getOrDefault("message", ex.getResponseBodyAsString()));
+        } catch (Exception parseEx) {
+            downstreamMessage = ex.getResponseBodyAsString();
+        }
+
+        response.put("error", HttpStatus.valueOf(ex.getStatusCode().value()).getReasonPhrase());
+        response.put("message", downstreamMessage);
+        response.put("status", ex.getStatusCode().value());
+        response.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(response, HttpStatus.valueOf(ex.getStatusCode().value()));
     }
 
 }

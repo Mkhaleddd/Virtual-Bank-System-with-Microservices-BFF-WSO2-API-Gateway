@@ -1,4 +1,4 @@
-package com.vbank.account_service.account.exception;
+package com.vbank.exception;
 
 public class InsufficientFundsException extends RuntimeException {
     public InsufficientFundsException(String message) {

@@ -1,4 +1,4 @@
-package com.vbank.account_service.account.exception;
+package com.vbank.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
