@@ -18,14 +18,22 @@ public class BffService {
     private final WebClient webClient;
     private final String USER_SERVICE_URL = "http://localhost:8081";
     private final String ACCOUNT_SERVICE_URL = "http://localhost:8082";
-    private final String TRANSACTION_SERVICE_URL = "http://localhost:8084";
+    private final String TRANSACTION_SERVICE_URL = "http://localhost:8083";
 
     public DashboardDto getDashboardData(UUID userId) {
+        UserDto userInfoResponse = webClient.get()
+                .uri(USER_SERVICE_URL + "/users/" + userId + "/profile")
+                .retrieve()
+                .bodyToMono(UserDto.class)
+                .block();
 
-        UserDto userInfoResponse = webClient.get().uri(USER_SERVICE_URL + "/users/" + userId).retrieve()
-                .bodyToMono(UserDto.class).block();
-        AccountDto[] accountsResponse = webClient.get().uri(ACCOUNT_SERVICE_URL + "/accounts/users/" + userId)
-                .retrieve().bodyToMono(AccountDto[].class).block();
+        AccountDto[] accountsResponse = webClient.get()
+                .uri(ACCOUNT_SERVICE_URL + "/accounts/users/" + userId)
+                .retrieve()
+                .bodyToMono(AccountDto[].class)
+                .onErrorResume(e -> reactor.core.publisher.Mono.just(new AccountDto[0])) // Fallback to empty array on
+                                                                                         // error/404
+                .block();
         if (accountsResponse != null) {
             for (AccountDto account : accountsResponse) {
                 TransactionDto[] transactionsResponse = webClient.get()
