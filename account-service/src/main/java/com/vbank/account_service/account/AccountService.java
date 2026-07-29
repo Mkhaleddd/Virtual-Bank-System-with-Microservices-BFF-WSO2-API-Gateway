@@ -10,9 +10,9 @@ import org.springframework.web.client.RestTemplate;
 import javax.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountService {
@@ -76,7 +76,7 @@ public class AccountService {
                         account.getBalance(),
                         account.getType(),
                         account.getStatus()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<BankAccountResponse> getBankAccountsByUser(UUID userId) {

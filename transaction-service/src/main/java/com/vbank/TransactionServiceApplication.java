@@ -1,4 +1,4 @@
-package com.vbank.transaction_service;
+package com.vbank;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;

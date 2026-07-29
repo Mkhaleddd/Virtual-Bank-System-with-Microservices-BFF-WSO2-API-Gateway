@@ -3,6 +3,8 @@ package com.vbank.service;
 import com.vbank.dto.TransferExecutionRequest;
 import com.vbank.dto.TransferInitiationRequest;
 import com.vbank.annotation.LoggableEvent;
+import com.vbank.exception.InsufficientFundsException;
+import com.vbank.exception.NotFoundException;
 import com.vbank.model.Transaction;
 import com.vbank.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -24,15 +27,31 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final RestTemplate restTemplate;
 
-    private final String ACCOUNT_SERVICE_URL = "http://localhost:8082/accounts/transfer";
+    private static final String ACCOUNT_SERVICE_URL = "http://localhost:8082/accounts/transfer";
+    private static final String ACCOUNT_SERVICE_BASE_URL = "http://localhost:8082/accounts/";
 
     public List<Transaction> getTransactions() {
         return transactionRepository.findAll();
     }
 
     @Transactional
-    @LoggableEvent(eventType = "TRANSFER_INITIATED")
+    //@LoggableEvent(eventType = "TRANSFER_INITIATED")
     public Map<String, Object> initiateTransfer(TransferInitiationRequest req) {
+        if (req.getFromAccountId().equals(req.getToAccountId())) {
+            throw new IllegalArgumentException("'from' and 'to' account cannot be the same.");
+        }
+
+        Map<String, Object> fromAccount = restTemplate.getForObject(
+                ACCOUNT_SERVICE_BASE_URL + req.getFromAccountId(), Map.class);
+        restTemplate.getForObject(
+                ACCOUNT_SERVICE_BASE_URL + req.getToAccountId(), Map.class);
+
+        BigDecimal fromBalance = new BigDecimal(fromAccount.get("balance").toString());
+        if (fromBalance.compareTo(req.getAmount()) < 0) {
+            throw new InsufficientFundsException(
+                    "Insufficient funds in account " + req.getFromAccountId());
+        }
+
         Transaction transaction = new Transaction();
         transaction.setFromAccountId(req.getFromAccountId());
         transaction.setToAccountId(req.getToAccountId());
@@ -50,18 +69,14 @@ public class TransactionService {
     }
 
     @Transactional
-    @LoggableEvent(eventType = "TRANSFER_EXECUTE")
+    //@LoggableEvent(eventType = "TRANSFER_EXECUTE")
     public Map<String, Object> executeTransfer(TransferExecutionRequest req) {
-        if (req == null || req.getTransactionId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction ID cannot be null");
-        }
-
         Transaction transaction = transactionRepository.findById(req.getTransactionId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                .orElseThrow(() -> new NotFoundException(
                         "Invalid 'from' or 'to' account ID."));
 
         if (!"INITIATED".equals(transaction.getDeliveryStatus())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transaction is already processed or invalid.");
+            throw new IllegalArgumentException("Transaction is already processed or invalid.");
         }
        
         try {
@@ -73,10 +88,10 @@ public class TransactionService {
 
             restTemplate.put(ACCOUNT_SERVICE_URL, balanceRequest);
 
-        } catch (HttpClientErrorException ex) {
+        } catch (RuntimeException ex) {
             transaction.setDeliveryStatus("FAILED");
             transactionRepository.save(transaction);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getResponseBodyAsString());
+            throw ex;
         } catch (Exception ex) {
             transaction.setDeliveryStatus("FAILED");
             transactionRepository.save(transaction);
@@ -95,7 +110,7 @@ public class TransactionService {
     public List<Transaction> getTransactionsByAccountId(String id) {
         List<Transaction> transactions = transactionRepository.findByFromAccountIdOrToAccountId(id, id);
         if (transactions.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No transactions found for account ID " + id + ".");
+            throw new NotFoundException("No transactions found for account ID " + id + ".");
         }
         return transactions;
     }
