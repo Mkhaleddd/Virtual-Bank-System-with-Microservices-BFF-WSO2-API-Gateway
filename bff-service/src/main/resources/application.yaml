@@ -8,8 +8,8 @@ spring:
 # Base URLs for routing and aggregating data from internal microservices
 services:
   user-service:
-    url: http://vbank-user-service:8081
+    url: http://localhost:8081
   account-service:
-    url: http://vbank-account-service:8082
+    url: http://localhost:8082
   transaction-service:
-    url: http://vbank-transaction-service:8083
+    url: http://localhost:8083

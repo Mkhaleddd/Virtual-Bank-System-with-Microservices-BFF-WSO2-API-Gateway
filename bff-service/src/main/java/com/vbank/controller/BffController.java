@@ -18,8 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BffController {
     private final BffService bffService;
-
-    @GetMapping("/{userId}")
+@GetMapping("/{userId}")
     public ResponseEntity<DashboardDto> getUserDashboard(@PathVariable UUID userId) {
         return ResponseEntity.ok(bffService.getDashboardData(userId));
 

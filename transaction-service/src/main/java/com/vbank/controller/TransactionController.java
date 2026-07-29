@@ -22,33 +22,33 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping
+@RequestMapping("/")
 @RequiredArgsConstructor
 public class TransactionController {
 
     private final TransactionService transactionService;
 
-    @GetMapping("/transactions")
+    @GetMapping("transactions")
     public List<Transaction> getAllTransactions() {
         return transactionService.getTransactions();
     }
         
     // POST /transactions/transfer/initiation: Initiates a fund transfer between two accounts
-    @PostMapping("/transactions/transfer/initiation")
+    @PostMapping("transactions/transfer/initiation")
     public ResponseEntity<Map<String, Object>> initiateTransfer(@Valid @RequestBody TransferInitiationRequest req) {
         Map<String, Object> response = transactionService.initiateTransfer(req);
         return ResponseEntity.ok(response);
     }
 
     // POST /transactions/transfer/execution: Execute fund transfer between two accounts
-    @PostMapping("/transactions/transfer/execution")
+    @PostMapping("transactions/transfer/execution")
     public ResponseEntity<Map<String, Object>> executeTransfer(@Valid @RequestBody TransferExecutionRequest req) {
         Map<String, Object> response = transactionService.executeTransfer(req);
         return ResponseEntity.ok(response);
     }
 
     // GET /accounts/{accountId}/transactions: Retrieves the transaction history for a specific account
-    @GetMapping("/accounts/{accountId}/transactions")
+    @GetMapping("accounts/{accountId}/transactions")
     public ResponseEntity<List<Transaction>> getTransactionsByAccountId(@PathVariable("accountId") String accountId) {
         List<Transaction> transactions = transactionService.getTransactionsByAccountId(accountId);
         return ResponseEntity.ok(transactions);
