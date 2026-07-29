@@ -35,7 +35,7 @@ public class TransactionService {
     }
 
     @Transactional
-    //@LoggableEvent(eventType = "TRANSFER_INITIATED")
+    @LoggableEvent(eventType = "TRANSFER_INITIATED")
     public Map<String, Object> initiateTransfer(TransferInitiationRequest req) {
         if (req.getFromAccountId().equals(req.getToAccountId())) {
             throw new IllegalArgumentException("'from' and 'to' account cannot be the same.");
@@ -69,7 +69,7 @@ public class TransactionService {
     }
 
     @Transactional
-    //@LoggableEvent(eventType = "TRANSFER_EXECUTE")
+    @LoggableEvent(eventType = "TRANSFER_EXECUTE")
     public Map<String, Object> executeTransfer(TransferExecutionRequest req) {
         Transaction transaction = transactionRepository.findById(req.getTransactionId())
                 .orElseThrow(() -> new NotFoundException(
