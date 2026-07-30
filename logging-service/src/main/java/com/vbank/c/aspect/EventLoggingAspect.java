@@ -23,7 +23,7 @@ public class EventLoggingAspect {
     @Around("@annotation(loggableEvent)")
     public Object logEvent(ProceedingJoinPoint joinPoint, LoggableEvent loggableEvent) throws Throwable {
         String eventType = loggableEvent.eventType();
-        Long extractedAccountId = extractAccountId(joinPoint.getArgs());
+        String extractedAccountId = extractAccountId(joinPoint.getArgs());
 
         try {
             Object result = joinPoint.proceed(); 
@@ -55,7 +55,7 @@ public class EventLoggingAspect {
         }
     }
 
-    private Long extractAccountId(Object[] args) {
+    private String extractAccountId(Object[] args) {
         if (args == null) return null;
         for (Object arg : args) {
             if (arg == null) continue;
@@ -73,7 +73,7 @@ public class EventLoggingAspect {
                 if (method != null) {
                     Object val = method.invoke(arg);
                     if (val != null) {
-                        return Long.valueOf(val.toString());
+                        return String.valueOf(val.toString());
                     }
                 }
             } catch (Exception ignored) {}

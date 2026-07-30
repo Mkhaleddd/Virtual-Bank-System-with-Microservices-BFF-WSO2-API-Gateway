@@ -20,7 +20,7 @@ public class LogMessageDto {
     private String eventType;  
 
     @JsonProperty("accountId")
-    private Long accountId;    
+    private String accountId;
 
     @JsonProperty("message")
     private String message;       
