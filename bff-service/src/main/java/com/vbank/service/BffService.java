@@ -11,10 +11,13 @@ import com.vbank.dto.UserDto;
 import com.vbank.dto.AccountDto;
 import com.vbank.dto.DashboardDto;
 import com.vbank.dto.TransactionDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class BffService {
+    private static final Logger log = LoggerFactory.getLogger(BffService.class);
     private final WebClient webClient;
     private final String USER_SERVICE_URL = "http://localhost:8081";
     private final String ACCOUNT_SERVICE_URL = "http://localhost:8082";
@@ -28,11 +31,13 @@ public class BffService {
                 .block();
 
         AccountDto[] accountsResponse = webClient.get()
-                .uri(ACCOUNT_SERVICE_URL + "/accounts/users/" + userId)
+                .uri(ACCOUNT_SERVICE_URL + "/users/" + userId + "/accounts")
                 .retrieve()
                 .bodyToMono(AccountDto[].class)
-                .onErrorResume(e -> reactor.core.publisher.Mono.just(new AccountDto[0])) // Fallback to empty array on
-                                                                                         // error/404
+                .onErrorResume(e -> {
+                    log.error("Failed to fetch accounts for user {}", userId, e);
+                    return reactor.core.publisher.Mono.just(new AccountDto[0]);
+                })                                                                                         // error/404
                 .block();
         if (accountsResponse != null) {
             for (AccountDto account : accountsResponse) {
@@ -40,6 +45,11 @@ public class BffService {
                         .uri(TRANSACTION_SERVICE_URL + "/accounts/" + account.getAccountId() + "/transactions")
                         .retrieve()
                         .bodyToMono(TransactionDto[].class)
+                        .onErrorResume(e -> {
+                            log.error("Failed to fetch transactions for account {}: {}",
+                                    account.getAccountId(), e.getMessage(), e);
+                            return reactor.core.publisher.Mono.just(new TransactionDto[0]);
+                        })
                         .block();
 
                 if (transactionsResponse != null) {
