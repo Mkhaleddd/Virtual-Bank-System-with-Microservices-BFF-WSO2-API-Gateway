@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -39,4 +40,7 @@ public class Account {
 
     @Column(nullable = false)
     private UUID userId;
+
+    @Column(nullable = false)
+    private Instant lastActivityAt;
 }

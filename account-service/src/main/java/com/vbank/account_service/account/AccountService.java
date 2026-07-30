@@ -9,10 +9,10 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class AccountService {
@@ -46,9 +46,15 @@ public class AccountService {
         accountRepository.subtractFromBalance(updateBalanceRequest.getAmount(),
                 updateBalanceRequest.getFromAccountId());
 
+        Instant now = Instant.now();
         fromAccount.setStatus(AccountStatus.ACTIVE);
+        fromAccount.setLastActivityAt(now);
         toAccount.setStatus(AccountStatus.ACTIVE);
+        toAccount.setLastActivityAt(now);
 
+        accountRepository.save(fromAccount);
+        accountRepository.save(toAccount);
+        
         return new UpdateBalanceResponse(
                 "Account updated successfully.");
     }
@@ -64,19 +70,6 @@ public class AccountService {
                 account.getBalance(),
                 account.getType(),
                 account.getStatus());
-    }
-
-    public List<BankAccountResponse> getAccountsByUserId(UUID userId) {
-        List<Account> accounts = accountRepository.findByUserId(userId);
-
-        return accounts.stream()
-                .map(account -> new BankAccountResponse(
-                        account.getId(),
-                        account.getNumber(),
-                        account.getBalance(),
-                        account.getType(),
-                        account.getStatus()))
-                .collect(Collectors.toList());
     }
 
     public List<BankAccountResponse> getBankAccountsByUser(UUID userId) {
@@ -107,6 +100,7 @@ public class AccountService {
             account.setBalance(createRequest.getInitialAmount());
             account.setType(createRequest.getAccountType());
             account.setNumber(generateUniqueAccountNumber());
+            account.setLastActivityAt(Instant.now());
             accountRepository.save(account);
         } else throw new NotFoundException("Account not found: " + createRequest.getUserId());
         return new CreateResponse(

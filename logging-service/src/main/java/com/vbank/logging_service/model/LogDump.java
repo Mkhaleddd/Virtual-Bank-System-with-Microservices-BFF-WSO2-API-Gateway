@@ -28,7 +28,7 @@ public class LogDump {
     private Long id;
 
     @Column(name = "account_id")
-    private Long accountId;
+    private String accountId;
 
     @Column(name = "event_type", nullable = false)
     private String eventType;
